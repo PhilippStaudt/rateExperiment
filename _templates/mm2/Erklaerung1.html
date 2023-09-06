@@ -1,0 +1,596 @@
+{% extends "global/Page.html" %}
+{% load otree static %}
+
+
+{% block content %}
+<style>
+.button {
+  border: none;
+  color: black;
+  padding: 100px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 40px 20px;
+  cursor: pointer;
+}
+
+.Next { background-color: #b1b1b1;
+        border: none;
+        color: black;
+        padding: 25px 50px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 25px 0px;
+        cursor: pointer;} /* Green */
+
+</style>
+<div class="container">
+<header class="header">
+<h1 id="title" class="text-left">Introduction</h1>
+</header>
+&nbsp;
+</div>
+<p style="color:#511313; font-size:15px"><b>{{ WrongAnswer3 }}</b></p>
+
+<div>
+Please read the following introduction carefully.
+</div>
+<div>
+&nbsp;
+</div>
+<div>
+<b>Supply (Energy generation)</b>:
+</div>
+<div>
+&nbsp;
+</div>
+<div>
+In this experiment, you act as an electricity consumer with a certain demand for units of energy. There are two sources of electricity available: Renewable and non-renewable energy. Renewable energy is generally cheaper, but the exact pricing mechanism differs across electricity rate designs.
+</div>
+<div>
+&nbsp;
+</div>
+<div>
+You will evaluate four electricity rate designs with different pricing mechanisms and you will then be able to choose one of those electricity rate designs for a replay. For every electricity rate design, you’ll play two “days”, which each consist of a morning period and an afternoon period. The diagram below shows the distribution of renewable generation over the morning and afternoon periods. There is always more or an equal amount of renewable generation in the afternoon compared to the morning of that same day.
+</div>
+<div>
+&nbsp;
+</div>
+<div>
+Supply fluctuates within the ranges shown in the figure. The upper bound is the maximum, the lower bound is the minimum and the value in the middle represents the average.
+(Please note that the displayed images of suns here and in the following are only meant to give an indication of the relative relationship between generation in the morning and the afternoon and give no indication of the actual generation.)
+</div>
+<div>
+&nbsp;
+</div>
+<div>
+In the following games, there are no strictly right or wrong answers. However, your performance does depend on a sensible strategy to deal with uncertainty.
+</div>
+<div>
+<br> </br>
+</div>
+
+<figure class="highcharts-figure">
+    <div id="container"></div>    <!-- Das ist die Boxplot-Konstruktion von Dir, Ich habe die "Sonnen" hinzugefügt und es auf 3 für den Durchschnitt reduziert -->
+    <p class="highcharts-description">
+    </p>
+</figure>  <!-- Aus welchem Grund auch immer, kann ich diese Grafik nurÜberschreitet der Energiebedarf am Markt, den des Angebotes an erneuerbaren Energien, so wird der zusätzliche Bedarf durch fossile Energieträger gewonnen. D.h. erneuerbare Energie wird immer priorisiert konsumiert. -->
+
+
+<div>
+&nbsp;
+</div>
+
+<div>
+&nbsp;
+</div>
+
+<div>
+&nbsp;
+</div>
+<div>
+
+</div>
+<div>
+&nbsp;
+</div>
+<button class="Next" >Continue</button>
+
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts-more.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+<script src="https://code.highcharts.com/themes/high-contrast-light.js"></script>
+
+
+<script>
+// Define custom series type for displaying low/med/high values using boxplot as a base
+Highcharts.seriesType('lowmedhigh', 'boxplot', {
+    keys: ['low', 'median', 'high'],
+    tooltip: {
+        pointFormat: '<span style="color:{point.color}">\u25CF</span> {series.name}: ' +
+            'Minimum <b>{point.low}</b> - Average <b>{point.median}</b> - Maximum <b>{point.high}</b><br/>'
+    }
+}, {
+    // Change point shape to a line with three crossing lines for low/median/high
+    // Stroke width is hardcoded to 1 for simplicity
+    drawPoints: function () {
+        var series = this;
+        Highcharts.each(this.points, function (point) {
+            var graphic = point.graphic,
+                verb = graphic ? 'animate' : 'attr',
+                shapeArgs = point.shapeArgs,
+                width = shapeArgs.width,
+                left = Math.floor(shapeArgs.x) + 0.5,
+                right = left + width,
+                crispX = left + Math.round(width / 2) + 0.5,
+                highPlot = Math.floor(point.highPlot) + 0.5,
+                medianPlot = Math.floor(point.medianPlot) + 0.5,
+                lowPlot = Math.floor(point.lowPlot) + 0.5 - (point.low === 0 ? 1 : 0); // Sneakily draw low marker even if 0
+
+            if (point.isNull) {
+                return;
+            }
+
+            if (!graphic) {
+                point.graphic = graphic = series.chart.renderer.path('point').add(series.group);
+            }
+
+            graphic.attr({
+                stroke: point.color || series.color,
+                "stroke-width": 1
+            });
+
+            graphic[verb]({
+                d: [
+                    'M', left, highPlot,
+                    'H', right,
+                    'M', left, medianPlot,
+                    'H', right,
+                    'M', left, lowPlot,
+                    'H', right,
+                    'M', crispX, highPlot,
+                    'V', lowPlot
+                ]
+            });
+        });
+    }
+});
+
+// Create chart
+var chart = Highcharts.chart('container', {
+    chart: {
+        type: 'lowmedhigh'
+    },
+
+    title: {
+        text: 'Estimated demand of your competition'
+    },
+
+    accessibility: {
+        point: {
+            descriptionFormatter: function (point) {
+                // Use default formatter for null points
+                if (point.isNull) {
+                    return false;
+                }
+
+                return point.category + ', low ' + point.low + ', median ' +
+                    point.median + ', high ' + point.high;
+            }
+        },
+
+        series: {
+            descriptionFormatter: function (series) {
+                return series.name + ', series ' + (series.index + 1) + ' of ' +
+                    series.chart.series.length + ' with ' + series.points.length +
+                    ' data points.';
+            }
+        },
+
+        typeDescription: 'Low, median, high. Each data point has a low, median and high value, depicted vertically as small ticks.' // Describe the chart type to screen reader users, since this is not a traditional boxplot chart
+    },
+
+    xAxis: [{
+        accessibility: {
+            description: 'Periods '
+        },
+        categories: ['Period1', 'Period2', 'Period3', 'Period1', 'Period2', 'Period3', 'Period1', 'Period2', 'Period3']
+    }],
+
+    yAxis: {
+        title: {
+            text: 'Demand of competition'
+        },
+        min: 0,
+    },
+
+    responsive: {
+        rules: [{
+            condition: {
+                maxWidth: 550
+            },
+            chartOptions: {
+                xAxis: {
+                    categories: ['Period1', 'Period2', 'Period3', 'Period1', 'Period2', 'Period3', 'Period1', 'Period2', 'Period3']
+                }
+            }
+        }]
+    },
+
+    tooltip: {
+        shared: true
+    },
+
+    plotOptions: {
+        series: {
+            stickyTracking: true,
+            whiskerWidth: 5
+        }
+    },
+
+    series: [{
+        name: 'Round1',
+        data: [
+            [8, 8, 14],
+            [8, 8, 14],
+            [6, 6, 12],
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+        ]
+    }, {
+        name: 'Round2',
+        data: [
+            null,
+            null,
+            null,
+            [9, 9, 15],
+            [7, 7, 13],
+            [6, 6, 12],
+            null,
+            null,
+            null,
+        ]
+    }, {
+        name: 'Round3',
+        data: [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            [10, 10, 16],
+            [7, 7, 14],
+            [7, 7, 14],
+        ]
+    }],
+});
+
+// Remove click events on container to avoid having "clickable" announced by AT
+// These events are needed for custom click events, drag to zoom, and navigator
+// support.
+
+
+var chart = Highcharts.chart('container', {
+    chart: {
+        type: 'lowmedhigh'
+    },
+
+    title: {
+        text: 'Supply of renewable energy'
+    },
+
+    accessibility: {
+        point: {
+            descriptionFormatter: function (point) {
+                // Use default formatter for null points
+                if (point.isNull) {
+                    return false;
+                }
+
+                return point.category + ', Minimum ' + point.low + ', Average ' +
+                    point.median + ', Maximum ' + point.high;
+            }
+        },
+
+        series: {
+            descriptionFormatter: function (series) {
+                return series.name + ', series ' + (series.index + 1) + ' of ' +
+                    series.chart.series.length + ' with ' + series.points.length +
+                    ' data points.';
+            }
+        },
+
+        typeDescription: 'Low, median, high. Each data point has a low, median and high value, depicted vertically as small ticks.' // Describe the chart type to screen reader users, since this is not a traditional boxplot chart
+    },
+
+    xAxis: [{
+        accessibility: {
+            description: 'Tageszeit '
+        },
+        categories: ['Morning', 'Afternoon']
+    }],
+
+    yAxis: {
+        title: {
+            text: 'Units of energy'
+        },
+        min: 0,
+        max: 20,
+    },
+
+    responsive: {
+        rules: [{
+            condition: {
+                maxWidth: 550
+            },
+            chartOptions: {
+                xAxis: {
+                    categories: ['Period1', 'Period2', 'Period3', 'Period1', 'Period2', 'Period3', 'Period1', 'Period2', 'Period3']
+                }
+            }
+        }]
+    },
+
+    plotOptions: {
+        series: {
+            stickyTracking: true,
+            whiskerWidth: 5,
+        }
+    },
+
+    series: [{
+        name: 'Renewable energy',
+        pointWidth: 20, // Hinzugefügt um Horizontale-Linien kleiner zu gestalten
+        medianWidth: 30,
+        data: [
+            [2, 6, 12],
+            [8, 12, 16],]
+    }],
+
+}, function (chart) {
+
+    var point = chart.series[0].data[1], // Über welchem Datenpunkt, dass Bild angezeigt wird
+        image = this.renderer.image('https://www.onlygfx.com/wp-content/uploads/2018/09/4-clipart-sun-1.png', //Bild Datei
+            point.plotX + chart.plotLeft -45, // Um es genau Mittig zu haben, Hälfte von BREITE/HÖHE Nehmen
+            point.plotY + chart.plotTop -120 // Abstand zum letzten Punkt
+            , 90,90 // Breite und Höhe
+        ).attr({
+            zIndex: 5
+        }).add();
+
+    var point = chart.series[0].data[0], // Periode 2
+        image = this.renderer.image('https://www.onlygfx.com/wp-content/uploads/2018/09/4-clipart-sun-1.png',
+            point.plotX + chart.plotLeft -30,
+            point.plotY + chart.plotTop -120 , 60,60
+        ).attr({
+            zIndex: 5
+        }).add();
+
+      var point = chart.series[0].data[2], // PERIODE 3
+        image = this.renderer.image('https://www.onlygfx.com/wp-content/uploads/2018/09/4-clipart-sun-1.png',
+            point.plotX + chart.plotLeft -15,
+            point.plotY + chart.plotTop -80 , 30,30
+        ).attr({
+            zIndex: 5
+        }).add();
+
+
+});
+
+
+</script>
+
+
+<style>
+@import url('https://fonts.googleapis.com/css?family=Poppins:200i,400&display=swap');
+
+:root {
+  --color-white: #000000;
+  --color-darkblue: #f3f3f3;
+  --color-darkblue-alpha: linear-gradient(
+      115deg, /* 115deg, */
+      rgba(255, 255, 255, 1.0),  /*rgba(30, 32, 138, 0.8), */
+      rgba(255, 255, 255, 0.8) /*rgba(108, 161, 217, 0.7) */
+
+    ); /* rgba(145, 145, 145, 0.1);*/
+  --color-green: #f3f3f3;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.25;
+  color: var(--color-white);
+  margin: 0;
+  text-align: justify;
+}
+
+/* mobile friendly alternative to using background-attachment: fixed */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: -1;
+  background: var(--color-darkblue);
+  background-image: linear-gradient(
+      115deg, /* 115deg, */
+      rgba(255, 255, 255, 1.0),  /*rgba(30, 32, 138, 0.8), */
+      rgba(255, 255, 255, 0.75) /*rgba(108, 161, 217, 0.7) */
+
+    ),
+    url("https://marmotamaps.com/de/fx/wallpaper/download/faszinationen/Marmotamaps_Wallpaper_Berchtesgaden_Desktop_1920x1080.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+h1 {
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+p {
+  font-size: 1.125rem;
+}
+
+h1,
+p {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+label {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+input,
+button,
+select,
+textarea {
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+button {
+  border: none;
+}
+
+.container {
+  width: 100%;
+  margin: 3.125rem auto 0 auto;
+}
+
+@media (min-width: 1400px) {
+  .container {
+    max-width: 1576px;
+  }
+}
+
+
+/* @media (min-width: 1768px) {
+  .container {
+    max-width: 1720px;
+  }
+}*/
+
+.header {
+  padding: 0 0.625rem;
+  margin-bottom: 1.875rem;
+}
+
+.description {
+  font-style: italic;
+  font-weight: 200;
+  text-shadow: 0px 0px 0px rgba(0, 0, 0, 0.4);
+}
+
+.clue {
+  margin-left: 0.25rem;
+  font-size: 0.9rem;
+  color: #e4e4e4;
+}
+
+.text-center {
+  text-align: center;
+}
+.text-left {
+  text-align: left;
+}
+
+/* form */
+
+form {
+  background: var(--color-darkblue-alpha);
+  padding: 2.5rem 0.625rem;
+  border-radius: 0.25rem;
+}
+
+@media (min-width: 480px) {
+  form {
+    padding: 2.5rem;
+  }
+}
+
+.form-group {
+  margin: 0 auto 1.25rem auto;
+  padding: 0.25rem;
+}
+
+.form-control {
+  display: block;
+  width: 100%;
+  height: 2.375rem;
+  padding: 0.375rem 0.75rem;
+  color: #495057;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+  border-color: #80bdff;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.input-radio,
+.input-checkbox {
+  display: inline-block;
+  margin-right: 0.625rem;
+  min-height: 1.25rem;
+  min-width: 1.25rem;
+}
+
+.input-textarea {
+  min-height: 120px;
+  width: 100%;
+  padding: 0.625rem;
+  resize: vertical;
+}
+
+.submit-button {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--color-green);
+  color: inherit;
+  border-radius: 2px;
+  cursor: pointer;}
+
+.blocksatz {
+    text-align: justify;
+}
+
+
+
+</style>
+
+{% endblock %}

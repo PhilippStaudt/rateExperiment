@@ -1,0 +1,372 @@
+{% extends "global/Page.html" %}
+{% load otree static %}
+
+
+{% block content %}
+<div class="container">
+<header class="header">
+<h1 id="title" class="text-left">Rate Design {{ Spiel_Counter }} - Real Time Pricing</h1>
+</header>
+</div>
+
+<div>
+&nbsp;
+</div><div>
+In Real Time Pricing, your supplier sets the price based on expected demand and supply. The price in the morning is communicated to you. Based on this price, you can decide whether you want to move demand between the morning and the afternoon period.
+</div>
+<div>
+&nbsp;
+</div>
+
+<div>
+The price in the morning does not change if you move your demand to or from the morning. The price in the afternoon is then set while also considering how much demand you have moved. In other words, if you move too much of your demand to the afternoon period, the price in the afternoon might get higher. If, on the other hand, you move demand from the afternoon period to the morning, the price in the afternoon might be lower. Remember that shifting demand leads to a cost of 1 monetary unit per shifted unit.
+</div>
+<div>
+&nbsp;
+</div>
+<div>
+You only have to decide on your demand in the morning. The demand in the afternoon is then automatically set as the difference between your total demand and your demand in the morning.</div>
+<div>
+&nbsp;<br>
+</div>
+<div>
+You will now be able to play a trial run. The first day will start directly after the trial run. Please click Continue when you’re ready.
+</div>
+<div>
+&nbsp;
+</div>
+<div>
+<b>Characterization of RTP: <br> Price change frequency: Every period <br> Price determination: Externally set <br> Price bids by consumer: No bids by consumers</b>
+</div>
+<div>
+
+</div>
+
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+<div>
+&nbsp;
+</div>
+
+<style>
+.Next { background-color: #b1b1b1;
+        border: none;
+        color: black;
+        padding: 25px 50px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 25px 0px;
+        cursor: pointer;} /* Green */
+</style>
+<button class="Next" >Continue</button>
+
+
+    <script>
+
+    Highcharts.chart('container', {
+
+    chart: {
+        type: 'column'
+    },
+
+    title: {
+        text: ''
+    },
+
+    xAxis: {
+        categories: ['<b>Morgen</b> <br/> <span style="color:steelblue">Variabler Bedarf: {{R1_P1_player_vardemand}}</span> <br/> <span style="color:darkorange">Preis: 3.5 GE</span>', '<b>Mittag</b> <br/> <span style="color:steelblue">Variabler Bedarf: {{R1_P2_player_vardemand}}</span> <br/> <span style="color:darkorange">Preis: 2.0 GE</span>'],
+        labels: {
+                style: {
+                    fontSize:'14px'
+                }
+            }
+    },
+
+    yAxis: {
+        allowDecimals: false,
+        min: 0,
+
+        title: {
+            text: 'Units'
+        }
+    },
+
+    tooltip: {
+        formatter: function () {
+            return '<b>' + this.x + '</b><br/>' +
+                this.series.name + ': ' + this.y + '<br/>' +
+                'Total: ' + this.point.stackTotal;
+        }
+    },
+
+    plotOptions: {
+        column: {
+            stacking: 'normal'
+        }
+    },
+
+    series: [{
+        name: 'variabler Bedarf',
+        data: [{{R1_P1_player_vardemand}}, {{R1_P2_player_vardemand}}],
+        stack: 'Period 1'
+    }, {
+        type: 'spline',
+        name: 'Preis',
+        lineWidth: 1,
+        lineColor: Highcharts.getOptions().colors[3],
+        data: [3.5, 2.0],
+        marker: {
+            lineWidth: 10,
+            lineColor: Highcharts.getOptions().colors[3],
+            fillColor: Highcharts.getOptions().colors[3] }
+        }]
+}, function (chart) {
+
+    var point = chart.series[0].data[1], // Über welchem Datenpunkt, dass Bild angezeigt wird
+        image = this.renderer.image('https://www.onlygfx.com/wp-content/uploads/2018/09/4-clipart-sun-1.png', //Bild Datei
+            point.plotX + chart.plotLeft -45, // Um es genau Mittig zu haben, Hälfte von BREITE/HÖHE Nehmen
+            chart.plotTop +5 // Abstand von oben (Geringer, da größte Sonne)
+            , 90,90 // Breite und Höhe
+        ).attr({
+            zIndex: 5
+        }).add();
+
+    var point = chart.series[0].data[0], // Periode 2
+        image = this.renderer.image('https://www.onlygfx.com/wp-content/uploads/2018/09/4-clipart-sun-1.png',
+            point.plotX + chart.plotLeft -30,
+            chart.plotTop +20 , 60,60
+        ).attr({
+            zIndex: 5
+        }).add();
+
+      var point = chart.series[0].data[2], // PERIODE 3
+        image = this.renderer.image('https://www.onlygfx.com/wp-content/uploads/2018/09/4-clipart-sun-1.png',
+            point.plotX + chart.plotLeft -15,
+            chart.plotTop +35 , 30,30
+        ).attr({
+            zIndex: 5
+        }).add();
+});
+
+    </script>
+
+
+
+
+
+
+<style>
+@import url('https://fonts.googleapis.com/css?family=Poppins:200i,400&display=swap');
+
+:root {
+  --color-white: #000000;
+  --color-darkblue: #f3f3f3;
+  --color-darkblue-alpha: linear-gradient(
+      115deg, /* 115deg, */
+      rgba(255, 255, 255, 1.0),  /*rgba(30, 32, 138, 0.8), */
+      rgba(255, 255, 255, 0.8) /*rgba(108, 161, 217, 0.7) */
+
+    ); /* rgba(145, 145, 145, 0.1);*/
+  --color-green: #f3f3f3;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.25;
+  color: var(--color-white);
+  margin: 0;
+  text-align: justify;
+}
+
+/* mobile friendly alternative to using background-attachment: fixed */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: -1;
+  background: var(--color-darkblue);
+  background-image: linear-gradient(
+      115deg, /* 115deg, */
+      rgba(255, 255, 255, 1.0),  /*rgba(30, 32, 138, 0.8), */
+      rgba(255, 255, 255, 0.75) /*rgba(108, 161, 217, 0.7) */
+
+    ),
+    url("https://marmotamaps.com/de/fx/wallpaper/download/faszinationen/Marmotamaps_Wallpaper_Berchtesgaden_Desktop_1920x1080.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+h1 {
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+p {
+  font-size: 1.125rem;
+}
+
+h1,
+p {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+label {
+  display: flex;
+  align-items: center;
+  font-size: 1.125rem;
+  margin-bottom: 0.5rem;
+}
+
+input,
+button,
+select,
+textarea {
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+button {
+  border: none;
+}
+
+.container {
+  width: 100%;
+  margin: 3.125rem auto 0 auto;
+}
+
+@media (min-width: 1576px) {
+  .container {
+    max-width: 1540px;
+  }
+}
+
+@media (min-width: 1768px) {
+  .container {
+    max-width: 1720px;
+  }
+}
+
+/* @media (min-width: 1768px) {
+  .container {
+    max-width: 1720px;
+  }
+}*/
+
+.header {
+  padding: 0 0.625rem;
+  margin-bottom: 1.875rem;
+}
+
+.description {
+  font-style: italic;
+  font-weight: 200;
+  text-shadow: 0px 0px 0px rgba(0, 0, 0, 0.4);
+}
+
+.clue {
+  margin-left: 0.25rem;
+  font-size: 0.9rem;
+  color: #e4e4e4;
+}
+
+.text-center {
+  text-align: center;
+}
+.text-left {
+  text-align: left;
+}
+
+/* form */
+
+form {
+  background: var(--color-darkblue-alpha);
+  padding: 2.5rem 0.625rem;
+  border-radius: 0.25rem;
+}
+
+@media (min-width: 480px) {
+  form {
+    padding: 2.5rem;
+  }
+}
+
+.form-group {
+  margin: 0 auto 1.25rem auto;
+  padding: 0.25rem;
+}
+
+.form-control {
+  display: block;
+  width: 100%;
+  height: 2.375rem;
+  padding: 0.375rem 0.75rem;
+  color: #495057;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+  border-color: #80bdff;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.input-radio,
+.input-checkbox {
+  display: inline-block;
+  margin-right: 0.625rem;
+  min-height: 1.25rem;
+  min-width: 1.25rem;
+}
+
+.input-textarea {
+  min-height: 120px;
+  width: 100%;
+  padding: 0.625rem;
+  resize: vertical;
+}
+
+.submit-button {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--color-green);
+  color: inherit;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+</style>
+<script>
+// coded by @lasjorg
+// eslint-disable-next-line no-unused-vars
+const projectName = 'survey-form';
+
+</script>
+<div>
+&nbsp;
+</div>
+
+{% endblock %}

@@ -1,0 +1,392 @@
+{% extends "global/Page.html" %}
+{% load otree static %}
+
+
+
+{% block content %}
+<style>
+.button {
+  border: none;
+  color: black;
+  padding: 100px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 40px 20px;
+  cursor: pointer;
+}
+
+.Next { background-color: #b1b1b1;
+        border: none;
+        color: black;
+        padding: 25px 50px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 25px 0px;
+        cursor: pointer;} /* Green */
+
+</style>
+<div class="container">
+<header class="header">
+<h1 id="title" class="text-left">Introduction</h1>
+</header>
+</div>
+<div>
+<b>Demand (Energy consumption)</b>:
+</div>
+<div>
+&nbsp;
+</div>
+<div>
+You have a fluctuating demand that is always higher or at least equally high in the afternoon relative to the demand in the morning. You can move your demand within the same day between the morning and afternoon period at will. However, as this causes discomfort, moving demand leads to a cost of 1 monetary unit (MU) per moved unit of energy demand. You cannot move your demand beyond a day.
+    <br> <br>
+In this experiment, you have competition that also tries to acquire energy. The demand of your competition is random but also higher or equally high in the afternoon relative to the morning.
+</div>
+<div>
+&nbsp;
+</div>
+The electricity price always lies between 1.0 MU and 5.0 MU. The electricity rate designs will be explained before you have to engage with them and there will be a trial run for each mechanism.
+<div>
+&nbsp;
+</div>
+<figure class="highcharts-figure">
+    <div id="TOU_R1_Result"></div>
+    <p class="highcharts-description">
+
+    </p>
+</figure>
+<div>
+<div>
+
+</div>
+
+
+<button class="Next" >Continue</button>
+
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+<script>
+
+    Highcharts.chart('container', {
+
+    chart: {
+        type: 'column'
+    },
+
+    title: {
+        text: 'Ihr Bedarf'
+    },
+
+    xAxis: {
+        categories: ['Morgen', 'Mittag', 'Abend']
+    },
+
+    yAxis: {
+        allowDecimals: false,
+        min: 0,
+        title: {
+            text: 'Units'
+        }
+    },
+
+    tooltip: {
+        formatter: function () {
+            return '<b>' + this.x + '</b><br/>' +
+                this.series.name + ': ' + this.y + '<br/>' +
+                'Total: ' + this.point.stackTotal;
+        }
+    },
+
+    plotOptions: {
+        column: {
+            stacking: 'normal'
+        }
+    },
+
+    series: [{
+        name: 'Demand',
+        data: [{{E_P1_player_vardemand}}, {{E_P2_player_vardemand}}],
+        stack: 'Period 1'
+    }]
+
+});
+
+    </script>
+
+<script>
+
+    Highcharts.chart('TOU_R1_Result', {
+
+    chart: {
+        type: 'column'
+    },
+
+    title: {
+        text: 'Exemplary Situation'
+    },
+
+    xAxis: {
+        categories: ['<b>Morning</b> <br/> <span style="color:red">Price: 1.0 MU</span>', '<b>Afternoon</b> <br/> <span style="color:red">Price: 2.5 MU</span>'],
+        labels: {
+                style: {
+                    fontSize:'14px'
+                }
+            }
+    },
+
+    yAxis: {
+        allowDecimals: false,
+        min: 0,
+        title: {
+            text: 'Energy Units'
+        }
+    },
+
+    tooltip: {
+        formatter: function () {
+            return '<b>' + this.x + '</b><br/>' +
+                this.series.name + ': ' + this.y + '<br/>' +
+                'Total: ' + this.point.stackTotal;
+        }
+    },
+
+    plotOptions: {
+        column: {
+            stacking: 'normal'
+        }
+    },
+
+    series: [{
+        name: 'Demand',
+        data: [{{E_P1_player_vardemand}}, {{E_P2_player_vardemand}}],
+        stack: 'demand'
+    },{
+        name: 'Competition Demand',
+        data: [{{E_P1_competition_vardemand}}, {{E_P2_competition_vardemand}}],
+        stack: 'demand'
+    },{
+        name: 'Renewable energy',
+        data: [{{E_P1_supply_res}}, {{E_P2_supply_res}}],
+        stack: 'supply'
+    },{
+        name: 'Non-renenewable energy',
+        data: [0, 4],
+        stack: 'supply'
+    }, {
+        type: 'spline',
+        name: 'Price',
+        lineWidth: 1,
+        lineColor: Highcharts.getOptions().colors[5],
+        data: [1.0, 2.5],
+        marker: {
+            lineWidth: 10,
+            lineColor: Highcharts.getOptions().colors[5],
+            fillColor: Highcharts.getOptions().colors[5] }
+        }]
+});
+
+    </script>
+
+
+<style>
+@import url('https://fonts.googleapis.com/css?family=Poppins:200i,400&display=swap');
+
+:root {
+  --color-white: #000000;
+  --color-darkblue: #f3f3f3;
+  --color-darkblue-alpha: linear-gradient(
+      115deg, /* 115deg, */
+      rgba(255, 255, 255, 1.0),  /*rgba(30, 32, 138, 0.8), */
+      rgba(255, 255, 255, 0.8) /*rgba(108, 161, 217, 0.7) */
+
+    ); /* rgba(145, 145, 145, 0.1);*/
+  --color-green: #f3f3f3;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.25;
+  color: var(--color-white);
+  margin: 0;
+  text-align: justify;
+}
+
+/* mobile friendly alternative to using background-attachment: fixed */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: -1;
+  background: var(--color-darkblue);
+  background-image: linear-gradient(
+      115deg, /* 115deg, */
+      rgba(255, 255, 255, 1.0),  /*rgba(30, 32, 138, 0.8), */
+      rgba(255, 255, 255, 0.75) /*rgba(108, 161, 217, 0.7) */
+
+    ),
+    url("https://marmotamaps.com/de/fx/wallpaper/download/faszinationen/Marmotamaps_Wallpaper_Berchtesgaden_Desktop_1920x1080.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+h1 {
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+p {
+  font-size: 1.125rem;
+}
+
+h1,
+p {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+label {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+input,
+button,
+select,
+textarea {
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+button {
+  border: none;
+}
+
+.container {
+  width: 100%;
+  margin: 3.125rem auto 0 auto;
+}
+
+@media (min-width: 1400px) {
+  .container {
+    max-width: 1576px;
+  }
+}
+
+
+/* @media (min-width: 1768px) {
+  .container {
+    max-width: 1720px;
+  }
+}*/
+
+.header {
+  padding: 0 0.625rem;
+  margin-bottom: 1.875rem;
+}
+
+.description {
+  font-style: italic;
+  font-weight: 200;
+  text-shadow: 0px 0px 0px rgba(0, 0, 0, 0.4);
+}
+
+.clue {
+  margin-left: 0.25rem;
+  font-size: 0.9rem;
+  color: #e4e4e4;
+}
+
+.text-center {
+  text-align: center;
+}
+.text-left {
+  text-align: left;
+}
+
+/* form */
+
+form {
+  background: var(--color-darkblue-alpha);
+  padding: 2.5rem 0.625rem;
+  border-radius: 0.25rem;
+}
+
+@media (min-width: 480px) {
+  form {
+    padding: 2.5rem;
+  }
+}
+
+.form-group {
+  margin: 0 auto 1.25rem auto;
+  padding: 0.25rem;
+}
+
+.form-control {
+  display: block;
+  width: 100%;
+  height: 2.375rem;
+  padding: 0.375rem 0.75rem;
+  color: #495057;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+  border-color: #80bdff;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.input-radio,
+.input-checkbox {
+  display: inline-block;
+  margin-right: 0.625rem;
+  min-height: 1.25rem;
+  min-width: 1.25rem;
+}
+
+.input-textarea {
+  min-height: 120px;
+  width: 100%;
+  padding: 0.625rem;
+  resize: vertical;
+}
+
+.submit-button {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--color-green);
+  color: inherit;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+</style>
+
+{% endblock %}
